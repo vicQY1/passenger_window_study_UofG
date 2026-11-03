@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Passenger Window Study | V3.2.6</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="stage" aria-label="模拟 SUV 左侧后排车窗">
+  <!-- 与 V3.2 相同原则：场景和实验目标共用一套毫米坐标 -->
+  <div id="doorGroup">
+    <svg id="doorSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1050" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="doorPaint" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#a1a8af"/><stop offset=".45" stop-color="#7a838d"/><stop offset="1" stop-color="#636d77"/>
+        </linearGradient>
+        <linearGradient id="windowSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#9eb9c9"/><stop offset="1" stop-color="#d2dcdf"/>
+        </linearGradient>
+        <clipPath id="windowClip" clipPathUnits="userSpaceOnUse">
+          <path id="windowClipPath" d="M135 77 Q140 65 153 65 L795 65 Q814 67 822 88 L825 585 Q825 607 805 612 L151 612 Q132 609 130 588 Z"/>
+        </clipPath>
+      </defs>
+      <g id="doorIllustration">
+        <path id="doorOutline" d="M30 28 Q36 22 55 22 L899 22 Q935 26 943 58 L943 983 Q940 1027 900 1038 L163 1038 Q111 1037 77 997 L26 929 L22 90 Q21 39 30 28 Z" fill="url(#doorPaint)" stroke="#46525d" stroke-width="7"/>
+        <path id="beltLine" d="M43 660 L921 660" fill="none" stroke="#c9d0d6" stroke-width="8"/>
+        <path id="panelSeam" d="M75 703 Q395 684 887 701" fill="none" stroke="#626d78" stroke-width="3" opacity=".75"/>
+        <path id="armrest" d="M112 773 Q138 748 181 748 H604 Q635 748 639 777 V853 Q635 884 596 884 H145 Q115 878 112 846 Z" fill="#68737d" stroke="#b2bbc2" stroke-width="4"/>
+        <path id="armrestGrip" d="M170 807 H540 Q565 807 565 828 Q565 848 535 849 H191 Q165 849 165 831 Z" fill="#4c5964" stroke="#8e9ca6" stroke-width="3"/>
+        <path id="lowerPocket" d="M395 914 Q650 891 868 913 L870 994 Q645 1021 435 996 Z" fill="#59646f" stroke="#89949d" stroke-width="4"/>
+        <path id="speaker" d="M119 921 Q135 891 170 892 H322 Q355 893 366 922 L378 996 H154 Q125 993 119 971 Z" fill="#525d67" stroke="#9aa4aa" stroke-width="3"/>
+        <path id="speakerInset" d="M157 944 L328 944" stroke="#788691" stroke-width="3" stroke-linecap="round"/>
+        <rect id="doorHandle" x="740" y="764" width="128" height="58" rx="18" fill="#dfe5e8" stroke="#5c6670" stroke-width="4"/>
+        <rect id="handleGrip" x="786" y="773" width="43" height="40" rx="11" fill="#56616b" stroke="#404b55" stroke-width="3"/>
+        <path id="windowTrimOuter" d="M126 78 Q128 48 156 46 L789 46 Q840 47 845 98 L848 590 Q848 631 806 633 L151 633 Q109 627 109 588 Z" fill="#303a42" stroke="#57646e" stroke-width="6"/>
+      </g>
+      <g id="glassContent" clip-path="url(#windowClip)">
+        <rect id="darkGlass" x="0" y="0" width="960" height="1050" fill="#9eb9c9"/>
+        <g id="demoScene" opacity=".8">
+          <rect width="960" height="1050" fill="url(#windowSky)"/>
+          <path d="M0 375 Q120 335 247 370 T490 358 T960 380 L960 1050 H0Z" fill="#a2b0b9" opacity=".55"/>
+          <path d="M0 456 Q185 427 390 447 T960 442 L960 1050 H0Z" fill="#8299a5" opacity=".5"/>
+          <g fill="#6c8999" opacity=".4"><rect x="75" y="290" width="50" height="150"/><rect x="160" y="335" width="45" height="112"/><rect x="270" y="316" width="62" height="150"/><rect x="420" y="280" width="40" height="170"/><rect x="555" y="344" width="70" height="130"/><rect x="700" y="310" width="49" height="153"/></g>
+          <path d="M0 524 Q240 500 450 522 T960 508 L960 1050 H0Z" fill="#7e9e94" opacity=".52"/>
+        </g>
+        <image id="scenePhoto" x="0" y="0" width="960" height="1050" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+
+      </g>
+      <path id="windowOutlineVisible" d="M135 77 Q140 65 153 65 L795 65 Q814 67 822 88 L825 585 Q825 607 805 612 L151 612 Q132 609 130 588 Z" fill="none" stroke="#edf2f4" stroke-width="4" opacity=".65"/>
+    </svg>
+    <!-- Native HTML video overlay: intentionally outside SVG foreignObject for Safari/WebKit. -->
+    <div id="videoObject" class="video-overlay" hidden>
+      <div id="videoContainer"><video id="windowVideo" playsinline muted preload="metadata"></video></div>
+    </div>
+    <div id="previewLayer" aria-hidden="true"></div>
+    <div id="fixationCross" aria-hidden="true" hidden>+</div>
+    <div id="targetCross" aria-hidden="true" hidden></div>
+    <div id="homeTarget" aria-hidden="true" hidden></div>
+  </div>
+  <div id="feedbackLayer" aria-hidden="true"></div>
+  <div id="ruler"><span>100 mm</span></div>
+  <div id="footer" data-i18n="footer">Conceptual SUV rear door · geometric pilot · NOT a validated vehicle replica</div>
+</main>
+
+<button id="showPanelBtn" type="button" hidden data-i18n="showPanel">显示设置 (H)</button>
+<aside id="panel" aria-label="实验设置">
+ <div class="langbar"><span data-i18n="language">语言 / Language</span><div><button type="button" id="langZh">中文</button><button type="button" id="langEn">English</button></div></div>
+ <h1 data-i18n="title">后排侧车窗交互实验 · V3.2.6</h1>
+ <p data-i18n="intro">左侧车窗 Pilot，保留 V3.2 的校准、视频、中英文和数据导出；去除旧雪铁龙车门与重复坐标系统。</p>
+
+ <section>
+  <h2 data-i18n="geometryTitle">1 · 几何与校准</h2>
+  <label for="windowPreset" data-i18n="presetLabel">车窗尺寸</label>
+  <select id="windowPreset">
+   <option value="small" data-i18n="small">小 · 625 × 475 mm</option>
+   <option value="median" data-i18n="medium">中 · 684 × 494 mm</option>
+   <option value="large" data-i18n="large">较大几何 Pilot · 700 × 550 mm（未验证）</option>
+   <option value="dloPilot" data-i18n="dloPilot">可见开口假设 Pilot · 700 × 450 mm</option>
+   <option value="suvUpperPilot" selected data-i18n="suvUpperPilot">SUV 上限候选 Pilot · 750 × 450 mm（待实车核对）</option>
+   <option value="custom" data-i18n="custom">自定义</option>
+  </select>
+  <div class="twocol">
+   <div><label for="windowWidthMm" data-i18n="windowWidth">车窗宽度（mm）</label><input id="windowWidthMm" type="number" min="400" max="900" value="750"></div>
+   <div><label for="windowHeightMm" data-i18n="windowHeight">车窗高度（mm）</label><input id="windowHeightMm" type="number" min="300" max="650" value="450"></div>
+  </div>
+  <div class="twocol">
+   <div><label for="screenWidthMm" data-i18n="screenWidth">显示屏有效宽度（mm）</label><input id="screenWidthMm" type="number" min="100" value="1895" step="0.5"></div>
+   <div><label for="scalePercent" data-i18n="scale">校准比例（%）</label><input id="scalePercent" type="number" min="40" max="180" value="100" step="0.1"></div>
+  </div>
+  <div class="twocol">
+   <div><label for="windowCenterScreenMm" data-i18n="windowCenter">窗中心距屏幕左端（mm）</label><input id="windowCenterScreenMm" type="number" value="947.5" step="1"></div>
+   <div><label for="windowBottomScreenMm" data-i18n="windowBottom">窗下沿距屏幕顶端（mm）</label><input id="windowBottomScreenMm" type="number" value="630" step="1"></div>
+  </div>
+  <div class="twocol">
+   <div><label for="inclinationDeg" data-i18n="inclination">实际安装倾角（°，日志）</label><input id="inclinationDeg" type="number" value="4" min="0" max="30" step="0.1"></div>
+   <div class="buttonAlign"><button id="centerWindowBtn" type="button" data-i18n="center">水平居中</button></div>
+  </div>
+  <div class="stat"><span data-i18n="geometryReadout">当前车窗尺寸</span><strong id="geometryReadoutValue">750 × 450 mm</strong></div>
+  <p class="note" data-i18n="calibrationNote">先用屏幕真实宽度校准 100 mm 标尺。切换尺寸时默认固定窗下沿与水平中心，不表示已复刻任何车型。H-point 参考不等于真实座椅/玻璃相对位置。</p>
+ </section>
+
+ <section>
+  <h2 data-i18n="sceneTitle">2 · 背景与视频（Visual Pilot）</h2>
+  <label for="sceneMode" data-i18n="sceneModeLabel">窗外背景</label>
+  <select id="sceneMode"><option value="demo" data-i18n="sceneDemo">简化模糊景观</option><option value="photo" data-i18n="scenePhotoOption">上传照片</option><option value="dark" data-i18n="sceneDark">纯色背景</option></select>
+  <label for="sceneFile" data-i18n="sceneFileLabel">上传背景照片（不上传服务器）</label>
+  <input id="sceneFile" type="file" accept="image/*">
+  <div class="twocol"><div><label for="sceneBlur" data-i18n="sceneBlurLabel">景观模糊度</label><input id="sceneBlur" type="range" min="0" max="12" step="1" value="3"></div><div><label for="sceneOpacity" data-i18n="sceneOpacityLabel">照片透明度（%）</label><input id="sceneOpacity" type="range" min="10" max="100" step="5" value="100"></div></div>
+  <label><input id="fixationEnabled" type="checkbox" style="width:auto;min-height:auto"/> <span data-i18n="fixationLabel">显示注视参考十字（可选）</span></label>
+  <label for="videoFile" data-i18n="videoFileLabel">选择视频（本地 MP4）</label>
+  <input id="videoFile" type="file" accept="video/mp4,video/webm,video/*">
+  <label for="videoSegment" data-i18n="videoSegmentLabel">视频片段（一个文件按每段 5 分钟分段）</label>
+  <select id="videoSegment">
+    <option value="0" data-i18n="segmentA">片段 A · 第 0–5 分钟</option>
+    <option value="1" data-i18n="segmentB">片段 B · 第 5–10 分钟</option>
+    <option value="2" data-i18n="segmentC">片段 C · 第 10–15 分钟</option>
+  </select>
+  <div class="twocol">
+   <div><label for="videoLimitSeconds" data-i18n="videoLimitLabel">每个片段播放上限（秒）</label><input type="number" min="1" max="600" step="1" value="300" id="videoLimitSeconds"></div>
+   <div><label data-i18n="videoProgressLabel">当前片段进度</label><div id="videoProgress" class="statusline" style="min-height:32px">00:00 / 05:00</div></div>
+  </div>
+  <label class="checkrow" for="videoSound"><input type="checkbox" id="videoSound"><span data-i18n="videoSound">播放视频声音（正式实验请固定）</span></label>
+  <label for="videoRegion" data-i18n="videoRegionLabel">视频位置</label>
+  <select id="videoRegion"><option value="front" data-i18n="front">前（靠 B 柱）</option><option value="middle" data-i18n="middle">中</option><option value="rear" data-i18n="rear">后（靠 C 柱）</option></select>
+  <div class="btnrow"><button id="videoPlay" type="button" data-i18n="play">播放</button><button id="videoPause" type="button" data-i18n="pause">暂停</button><button id="videoStop" type="button" data-i18n="hideVideo">停止/隐藏</button></div>
+  <p class="note" data-i18n="videoMappingNote">请将片段 A/B/C 与前/中/后位置进行跨参与者平衡，不能固定 A=前，B=中，C=后。暂停后可以继续当前片段，完成上限后不会自动播下一个位置。</p>
+
+  <p class="note" data-i18n="videoNote">三个位置的视频均为 250 × 140.6 mm（750 mm 窗口），使用 HTML 层避免 macOS Safari 视频偏移。</p>
+  <div id="videoStatus" class="statusline"></div>
+  <button id="videoCsvBtn" type="button" data-i18n="videoExport">导出视频事件 CSV</button>
+ </section>
+
+ <section>
+  <h2 data-i18n="spatialTitle">3 · Spatial Target Pilot</h2>
+  <div class="twocol">
+   <div><label for="participantId" data-i18n="participant">Participant ID</label><input id="participantId" value="P001" type="text"></div>
+   <div><label for="sessionId" data-i18n="session">Session ID</label><input id="sessionId" value="S01" type="text"></div>
+  </div>
+  <div class="twocol">
+   <div><label for="interactionHand" data-i18n="interactionHand">使用手</label><select id="interactionHand"><option value="left" data-i18n="leftHand">左手</option><option value="right" data-i18n="rightHand">右手</option></select></div>
+   <div><label for="handDominance" data-i18n="handDominance">惯用手</label><select id="handDominance"><option value="right" data-i18n="rightHand">右手</option><option value="left" data-i18n="leftHand">左手</option><option value="mixed" data-i18n="mixed">混合/不明确</option></select></div>
+  </div>
+
+  <div class="twocol">
+   <div><label for="gridLayout" data-i18n="gridLayout">固定点位布局</label>
+   <select id="gridLayout">
+      <option value="4x3_200">
+        4 × 3 · 200 mm 间距（12 点）
+      </option>
+      <option value="5x3_150">5 × 3 · 150 mm 间距（中心留空，共 14 点）</option>
+      <option value="5x3_170" selected>
+        5 × 3 · 170 mm（14 点，推荐）
+      </option>
+      <option value="8x5_100">
+        8 × 5 · 100 mm 间距（40 点）
+      </option>
+    </select></div>
+   <div><label for="repetitions" data-i18n="repetitions">每点重复次数</label><input id="repetitions" type="number" min="1" max="5" value="2"></div>
+  <div><label class="checkrow" for="returnToCenter">
+      <input id="returnToCenter" type="checkbox" checked>
+      <span data-i18n="returnToCenter">
+        每个目标后返回车窗中心并触碰确认
+      </span>
+    </label></div>
+   </div>
+
+<div class="twocol">
+  <div>
+    <label for="targetSizeMm" data-i18n="targetSize">
+      十字宽度（mm）
+    </label>
+    <input id="targetSizeMm" type="number"
+           min="8" max="30" value="30">
+  </div>
+  <div>
+    <label for="hitRadiusMm" data-i18n="hitRadius">
+      命中半径（mm）
+    </label>
+    <input id="hitRadiusMm" type="number"
+           min="5" max="40" value="15">
+  </div>
+</div>
+
+<label class="checkrow" for="strictHitRadius">
+  <input id="strictHitRadius" type="checkbox" checked>
+  <span data-i18n="strictHitRadius">
+    限定命中半径（取消勾选：车窗内任意位置均有效）
+  </span>
+</label>
+
+<div class="twocol">
+  <div>
+    <label for="timeoutMs" data-i18n="timeout">
+      单目标超时（ms）
+    </label>
+    <input id="timeoutMs" type="number"
+           min="1000" max="15000"
+           value="5000" step="100">
+  </div>
+  <div>
+    <label for="itiMs" data-i18n="iti">
+      目标间隔（ms）
+    </label>
+    <input id="itiMs" type="number"
+           min="0" max="3000"
+           value="400" step="50">
+  </div>
+</div>
+
+  <label for="sequenceSeed" data-i18n="sequenceSeed">可重复随机种子</label><input id="sequenceSeed" type="text" value="pilot-001">
+  <p class="note" data-i18n="spatialNote">4×3/200 mm、5×3/150 mm（预留中心返回点，共14点）、8×5/100 mm 三种固定毫米布局，伪随机呈现。可选择中心返回。</p>
+  <div class="btnrow"><button id="previewBtn" type="button" data-i18n="preview">显示点位预览</button><button id="startSpatialBtn" class="primary" type="button" data-i18n="start">开始点选</button><button id="stopSpatialBtn" type="button" data-i18n="stop">停止</button></div>
+  <div id="spatialStatus" class="statusline"></div>
+  <div class="btnrow"><button id="trialsCsvBtn" type="button" data-i18n="exportTrials">导出试次 CSV</button><button id="eventsCsvBtn" type="button" data-i18n="exportClicks">导出点击 CSV</button></div>
+ </section>
+
+ <section>
+  <h2 data-i18n="diagnosticsTitle">4 · 校准检查</h2>
+  <label for="inputMode" data-i18n="inputModeLabel">输入方式标注（保留设备原始 pointerType）</label>
+  <select id="inputMode"><option value="finger" data-i18n="inputFinger">手指（人工标注）</option><option value="auto" data-i18n="inputAuto">采用设备识别</option><option value="mouse" data-i18n="inputMouse">鼠标</option><option value="stylus" data-i18n="inputStylus">触控笔</option></select>
+  <div class="btnrow"><button id="diagnosticsBtn" type="button" data-i18n="diagnostics">触摸诊断：关</button><button id="diagnosticsCsvBtn" type="button" data-i18n="diagnosticsExport">诊断 CSV</button></div>
+  <div id="touchStatus" class="statusline" data-i18n="touchHint">不在正式试次内进行触摸诊断。报告屏幕与车窗毫米坐标。</div>
+  <div class="btnrow"><button id="fullscreenBtn" type="button" data-i18n="fullscreen">全屏</button><button id="hidePanelBtn" type="button" data-i18n="hidePanel">隐藏设置 (H)</button></div>
+ </section>
+</aside>
+<script src="languages.js"></script>
+<script src="app.js"></script>
+<script src="video-task.js"></script>
+<script src="experiment.js"></script>
+</body>
+</html>

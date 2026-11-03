@@ -1,0 +1,127 @@
+:root{--bg:#192832;--text:#f1f5f8;--secondary:#b7c7d5;--line:#496070;--accent:#337ea6}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:13px/1.5 system-ui,"Microsoft YaHei",Arial,sans-serif}
+body{touch-action:none;user-select:none}
+#stage{position:fixed;inset:0;overflow:hidden;background:var(--bg);touch-action:none;cursor: default;}
+
+/* 触摸操作：隐藏鼠标指针 */
+
+#stage.touch-input {cursor: none;}
+
+#doorGroup{position:absolute;transform-origin:top left;touch-action:none;pointer-events:none}
+#doorSvg{width:100%;height:100%;display:block;pointer-events:none}
+#previewLayer{position:absolute;inset:0;pointer-events:none;z-index:4}
+.previewTarget{position:absolute;transform:translate(-50%,-50%);color:#ffd46e;font-weight:700;text-shadow:0 1px 2px #111;font-size:20px;line-height:1}
+.previewTarget small{font-size:11px;position:absolute;top:-13px;left:12px;color:#f5e1b6}
+
+#feedbackLayer{position:absolute;inset:0;pointer-events:none;z-index:8}
+.feedback-dot{position:absolute;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;box-shadow:0 0 5px #0b20278c}
+.feedback-dot.hit{background:#39d478}
+.feedback-dot.miss{background:#ff6267}
+#videoContainer,#windowVideo{width:100%;height:100%;background:#15252e}
+#windowVideo{object-fit:contain;display:block;pointer-events:none}
+#ruler{position:absolute;bottom:46px;left:24px;border-bottom:3px solid #ffe8ab;height:14px;pointer-events:none;z-index:10}
+#ruler::before,#ruler::after{content:"";position:absolute;bottom:-3px;height:13px;border-left:2px solid #ffe8ab}
+#ruler::after{right:0}
+#ruler span{position:absolute;left:50%;top:-17px;transform:translateX(-50%);white-space:nowrap;color:#ffe8ab}
+#footer{position:absolute;bottom:9px;left:24px;color:#a8bdc9;font-size:11px;pointer-events:none}
+#panel{position:absolute;top:12px;left:12px;width:385px;max-height:calc(100vh - 24px);overflow-y:auto;z-index:15;background:#101e29f5;border:1px solid #456275;border-radius:10px;padding:15px;box-shadow:0 12px 28px #0007;touch-action:pan-y;overscroll-behavior:contain}
+#panel h1{font-size:16px;margin:3px 0 8px;line-height:1.25}
+#panel h2{font-size:13px;margin:0 0 9px;color:#eef6fc}
+#panel p{color:#aec1ce;font-size:11.5px;margin:7px 0}
+#panel section{border-top:1px solid #38505f;padding-top:13px;margin-top:14px}
+.langbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:9px;border-bottom:1px solid #38505f}
+.langbar button{font-size:11px;padding:4px 9px;margin-left:5px}
+.langbar button.active{background:#287bab;border-color:#67c6f3}
+label{display:block;color:#cadbe5;font-size:11.5px;margin-top:8px;margin-bottom:3px}
+input,select{width:100%;padding:6px 7px;min-height:32px;font:12px system-ui;color:#f5fbfe;background:#243b4d;border:1px solid #6a8293;border-radius:5px}
+input[type=range]{padding:0;min-height:23px;accent-color:#54aad3}
+input[type=file]{font-size:11px}
+button{min-height:32px;color:white;background:#2c4c63;border:1px solid #7894a6;border-radius:5px;padding:6px 8px;font:12px system-ui;cursor:pointer}
+button:hover{filter:brightness(1.12)}
+button.primary{background:#226d9c;border-color:#4c99c1}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.btnrow button{flex:1 1 auto}
+.stat{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:#b5ccd8}
+.stat strong{color:#fff}
+.buttonAlign{display:flex;align-items:end}.buttonAlign button{width:100%}
+.statusline{background:#162f41;border-radius:5px;padding:7px;white-space:pre-wrap;font:11px/1.5 Consolas,monospace;color:#cde8f3;min-height:40px;margin-top:8px}
+#showPanelBtn{position:absolute;top:12px;left:12px;z-index:16}
+[hidden]{display:none!important}
+
+
+/* 目标十字和中心返回十字 */
+#targetCross,
+#homeTarget {
+  position: absolute;
+  z-index: 7;
+
+  transform: translate(-50%, -50%);
+  width: 15px;
+  height: 15px;
+
+  border: none;
+  border-radius: 0;
+  background: transparent;
+
+  pointer-events: none;
+}
+
+/* 十字的横线与竖线 */
+#targetCross::before,
+#targetCross::after,
+#homeTarget::before,
+#homeTarget::after {
+  content: "";
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  background: #ffffff;
+  box-shadow: 0 0 3px #142633;
+  border-radius: 1px;
+}
+
+/* 横线 */
+#targetCross::before,
+#homeTarget::before {
+  width: 100%;
+  height: var(--stroke, 3px);
+}
+
+/* 竖线 */
+#targetCross::after,
+#homeTarget::after {
+  width: var(--stroke, 3px);
+  height: 100%;
+}
+
+
+/* 隐藏时彻底不显示 */
+#targetCross[hidden],
+#homeTarget[hidden] {
+  display: none !important;
+}
+
+.checkrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.checkrow input[type="checkbox"] {
+  width: auto;
+  min-height: 0;
+  flex: none;
+}
+
+#fixationCross{position:absolute;z-index:6;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:#1d38448c;color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:20px;font-weight:300}
+
+/* Safari-safe video: native HTML sibling of SVG, positioned via shared mm-to-pixel geometry */
+#videoObject.video-overlay{position:absolute;z-index:3;pointer-events:none;overflow:hidden;background:#15252e;}
+#videoObject[hidden]{display:none!important;}
+#videoObject #videoContainer,#videoObject #windowVideo{width:100%;height:100%;}
+#videoObject #windowVideo{display:block;object-fit:contain;pointer-events:none;}
